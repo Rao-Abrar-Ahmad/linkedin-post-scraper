@@ -1,5 +1,5 @@
 import { BrowserManager } from './browser';
-import { parsePostPage } from './parser';
+import { JsonLdResult, parseJsonLd, parsePostPage } from './parser';
 import { ScrapedPost, ScraperException } from './types';
 import { normalizeLinkedInUrl } from './validator';
 
@@ -7,7 +7,7 @@ import { normalizeLinkedInUrl } from './validator';
  * Scrapes a public LinkedIn post by opening a browser page, navigating,
  * handling auth walls, and extracting the post details.
  */
-export async function scrapeLinkedInPost(rawUrl: string): Promise<ScrapedPost> {
+export async function scrapeLinkedInPost(rawUrl: string): Promise<JsonLdResult> {
   const url = normalizeLinkedInUrl(rawUrl);
   const browserManager = BrowserManager.getInstance();
   const { context, page } = await browserManager.createPage();
@@ -96,7 +96,10 @@ export async function scrapeLinkedInPost(rawUrl: string): Promise<ScrapedPost> {
     }
 
     // Perform DOM and Metadata parsing
-    const postData = await parsePostPage(page, url);
+    console.log(bodyContent, url);
+    //const postData = await parsePostPage(page, url);
+    console.log('json ld of this post', await parseJsonLd(page));
+    const postData = await parseJsonLd(page);
     return postData;
 
   } catch (error) {

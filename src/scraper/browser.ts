@@ -34,7 +34,7 @@ export class BrowserManager {
     try {
       console.log('Launching Playwright Chromium browser instance...');
       this.browser = await chromium.launch({
-        headless: false,
+        headless: true,
         args: [
           '--no-sandbox',
           '--disable-setuid-sandbox',

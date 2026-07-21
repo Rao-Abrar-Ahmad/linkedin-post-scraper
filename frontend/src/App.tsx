@@ -1,54 +1,195 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Search, 
-  Link2, 
-  ThumbsUp, 
-  MessageSquare, 
-  Copy, 
-  Check, 
-  Download, 
-  AlertTriangle, 
-  RefreshCw, 
+import {
+  Search,
+  Link2,
+  ThumbsUp,
+  MessageSquare,
+  Copy,
+  Check,
+  Download,
+  AlertTriangle,
+  RefreshCw,
   ExternalLink,
   Info,
   Calendar,
   Clock,
   Sparkles,
-  ArrowRight
+  ArrowRight,
+  Users
 } from 'lucide-react';
 
-interface ScrapedPost {
-  url: string;
-  author: {
-    name: string;
-    headline?: string;
-    profileUrl?: string;
-  };
-  content: string;
-  images: string[];
-  likes?: number;
-  comments?: number;
-  postedAt?: string;
-  scrapedAt: string;
+// ─── Types matching the new backend JsonLdResult ─────────────────────────────
+
+interface JsonLdResult {
+  exists: boolean;
+  objects: Record<string, any>[];
+  socialMediaPosting?: Record<string, any>;
+  scripts: string[];
 }
+
+/** Normalised post data extracted from the SocialMediaPosting JSON-LD object. */
+interface NormalisedPost {
+  url: string;
+  authorName: string;
+  authorUrl?: string;
+  authorFollowers?: number;
+  authorImageUrl?: string;
+  content: string;
+  headline?: string;
+  images: string[];
+  likes: number;
+  comments: number;
+  postedAt: string;
+}
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+function normalisePost(raw: JsonLdResult, inputUrl: string): NormalisedPost | null {
+  const smp = raw.socialMediaPosting;
+  if (!smp) return null;
+
+  // Author
+  const author = smp.author ?? {};
+  const authorName: string = author.name ?? 'LinkedIn Member';
+  const authorUrl: string | undefined = author.url;
+
+  // Author followers from author.interactionStatistic
+  let authorFollowers: number | undefined;
+  const authorStat = author.interactionStatistic;
+  if (authorStat && typeof authorStat === 'object') {
+    if (authorStat.userInteractionCount !== undefined) {
+      authorFollowers = Number(authorStat.userInteractionCount);
+    }
+  }
+
+  // Author image
+  let authorImageUrl: string | undefined;
+  if (author.image) {
+    if (typeof author.image === 'string') {
+      authorImageUrl = author.image;
+    } else if (author.image.url) {
+      authorImageUrl = author.image.url;
+    } else if (author.image.contentUrl) {
+      authorImageUrl = author.image.contentUrl;
+    }
+  }
+
+  // Content
+  const content: string = smp.articleBody ?? '';
+
+  // Headline
+  const headline: string | undefined = smp.headline;
+
+  // Images
+  const images: string[] = [];
+  if (smp.image) {
+    if (typeof smp.image === 'string') {
+      images.push(smp.image);
+    } else if (Array.isArray(smp.image)) {
+      for (const img of smp.image) {
+        if (typeof img === 'string') images.push(img);
+        else if (img?.url) images.push(img.url);
+        else if (img?.contentUrl) images.push(img.contentUrl);
+      }
+    } else if (smp.image.url) {
+      images.push(smp.image.url);
+    } else if (smp.image.contentUrl) {
+      images.push(smp.image.contentUrl);
+    }
+  }
+  // Also check sharedContent for images
+  if (smp.sharedContent?.thumbnail) {
+    const thumb = smp.sharedContent.thumbnail;
+    if (typeof thumb === 'string') images.push(thumb);
+    else if (thumb?.url) images.push(thumb.url);
+    else if (thumb?.contentUrl) images.push(thumb.contentUrl);
+  }
+
+  // Engagement: interactionStatistic array
+  let likes = 0;
+  let comments = 0;
+
+  if (Array.isArray(smp.interactionStatistic)) {
+    for (const stat of smp.interactionStatistic) {
+      const type = stat.interactionType ?? '';
+      const count = Number(stat.userInteractionCount ?? 0);
+      if (type.includes('Like')) {
+        likes = count;
+      } else if (type.includes('Comment')) {
+        comments = count;
+      }
+    }
+  }
+
+  // Comment count — direct field overrides interactionStatistic
+  if (smp.commentCount !== undefined) {
+    comments = Number(smp.commentCount);
+  }
+
+  // Date
+  const postedAt = smp.datePublished ?? 'Recently';
+
+  // URL
+  const url = smp.url ?? inputUrl;
+
+  return {
+    url,
+    authorName,
+    authorUrl,
+    authorFollowers,
+    authorImageUrl,
+    content,
+    headline,
+    images,
+    likes,
+    comments,
+    postedAt,
+  };
+}
+
+function formatDate(isoOrText: string): string {
+  try {
+    const d = new Date(isoOrText);
+    if (isNaN(d.getTime())) return isoOrText;
+    return d.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  } catch {
+    return isoOrText;
+  }
+}
+
+function formatNumber(n: number): string {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1).replace(/\.0$/, '')}M`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1).replace(/\.0$/, '')}K`;
+  return n.toLocaleString();
+}
+
+// ─── Loading Stages ──────────────────────────────────────────────────────────
 
 const STAGES = [
   'Warming up the secure browser instance...',
   'Navigating anonymously to the LinkedIn post...',
   'Bypassing initial redirects & cookie banners...',
   'Evaluating DOM content and checking for auth walls...',
-  'Extracting post text and author metadata...',
-  'Locating image references and attachments...',
-  'Parsing engagement metrics (likes & comments)...',
+  'Extracting JSON-LD structured data...',
+  'Parsing SocialMediaPosting schema...',
+  'Resolving author details & engagement metrics...',
   'Wrapping up parsed outputs...'
 ];
+
+// ─── App ─────────────────────────────────────────────────────────────────────
 
 export default function App() {
   const [url, setUrl] = useState('');
   const [loading, setLoading] = useState(false);
   const [stageIndex, setStageIndex] = useState(0);
   const [error, setError] = useState<{ code: string; message: string } | null>(null);
-  const [post, setPost] = useState<ScrapedPost | null>(null);
+  const [post, setPost] = useState<NormalisedPost | null>(null);
   const [copied, setCopied] = useState(false);
 
   // Cycle loading stages to keep the user engaged
@@ -88,7 +229,26 @@ export default function App() {
           message: result.error?.message || 'An unexpected error occurred.'
         });
       } else {
-        setPost(result.data);
+        const jsonLd: JsonLdResult = result.data;
+
+        if (!jsonLd.exists || !jsonLd.socialMediaPosting) {
+          setError({
+            code: 'NO_DATA',
+            message: 'No structured post data (JSON-LD) was found on this page. The post may be private or LinkedIn may have blocked the request.'
+          });
+          return;
+        }
+
+        const normalised = normalisePost(jsonLd, url.trim());
+        if (!normalised || !normalised.content) {
+          setError({
+            code: 'PARSE_ERROR',
+            message: 'Could not extract post content from the structured data. The page may not contain a valid SocialMediaPosting schema.'
+          });
+          return;
+        }
+
+        setPost(normalised);
       }
     } catch (err) {
       setError({
@@ -110,10 +270,9 @@ export default function App() {
   const handleExportMarkdown = () => {
     if (!post) return;
     const md = `
-# LinkedIn Post by ${post.author.name}
-*Headline: ${post.author.headline || 'N/A'}*
-*Scraped from: ${post.url}*
-*Date: ${post.postedAt || 'Recently'}*
+# LinkedIn Post by ${post.authorName}
+${post.headline ? `*${post.headline}*\n` : ''}*Scraped from: ${post.url}*
+*Date: ${post.postedAt}*
 
 ---
 
@@ -122,15 +281,15 @@ ${post.content}
 ---
 
 ## Metrics
-- Likes: ${post.likes ?? 0}
-- Comments: ${post.comments ?? 0}
-- Scraped At: ${new Date(post.scrapedAt).toLocaleString()}
+- Likes: ${formatNumber(post.likes)}
+- Comments: ${formatNumber(post.comments)}
+${post.authorFollowers ? `- Author Followers: ${formatNumber(post.authorFollowers)}` : ''}
     `.trim();
 
     const blob = new Blob([md], { type: 'text/markdown' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = `linkedin-post-${post.author.name.toLowerCase().replace(/\s+/g, '-')}.md`;
+    link.download = `linkedin-post-${post.authorName.toLowerCase().replace(/\s+/g, '-')}.md`;
     link.click();
   };
 
@@ -138,6 +297,7 @@ ${post.content}
     return name
       .split(' ')
       .map((n) => n[0])
+      .filter(Boolean)
       .slice(0, 2)
       .join('')
       .toUpperCase();
@@ -145,7 +305,7 @@ ${post.content}
 
   return (
     <div className="min-h-screen relative overflow-hidden flex flex-col justify-between font-sans">
-      
+
       {/* Decorative Gradients / Ambient Glows */}
       <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-blue-500/10 blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-indigo-500/10 blur-[120px] pointer-events-none" />
@@ -162,15 +322,15 @@ ${post.content}
                 LinkPeek
               </span>
               <span className="ml-1.5 px-2 py-0.5 text-[10px] font-medium tracking-wide uppercase rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400">
-                v1.0
+                v2.0
               </span>
             </div>
           </div>
           <div className="flex items-center space-x-4">
-            <a 
-              href="https://github.com" 
-              target="_blank" 
-              rel="noreferrer" 
+            <a
+              href="https://github.com"
+              target="_blank"
+              rel="noreferrer"
               className="text-sm font-medium text-slate-400 hover:text-white transition-colors duration-200 flex items-center space-x-1"
             >
               <span>Docs</span>
@@ -182,14 +342,14 @@ ${post.content}
 
       {/* Main Container */}
       <main className="max-w-4xl mx-auto px-6 py-12 flex-1 w-full">
-        
+
         {/* Title Section */}
         <div className="text-center mb-10">
           <h1 className="font-outfit text-4xl sm:text-5xl font-extrabold tracking-tight mb-4 bg-gradient-to-r from-white via-slate-100 to-indigo-200 bg-clip-text text-transparent">
             LinkedIn Public Post Scraper
           </h1>
           <p className="text-slate-400 text-base max-w-xl mx-auto">
-            Paste a public LinkedIn post URL below to extract post text, high-res images, and engagement stats.
+            Paste a public LinkedIn post URL below to extract structured data via JSON-LD — post text, author info, images, and engagement stats.
           </p>
         </div>
 
@@ -198,7 +358,7 @@ ${post.content}
           <div className="relative group">
             {/* Input Background Glow */}
             <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl blur opacity-25 group-hover:opacity-40 transition duration-300" />
-            
+
             <div className="relative flex flex-col sm:flex-row gap-3 bg-[#0d1321] border border-slate-800 rounded-2xl p-2.5">
               <div className="flex-1 flex items-center space-x-3 px-3">
                 <Search className="w-5 h-5 text-slate-500 shrink-0" />
@@ -249,8 +409,8 @@ ${post.content}
               {STAGES[stageIndex]}
             </p>
             <div className="w-48 bg-slate-800/50 h-1.5 rounded-full overflow-hidden mt-4">
-              <div 
-                className="bg-gradient-to-r from-blue-500 to-indigo-500 h-full transition-all duration-500" 
+              <div
+                className="bg-gradient-to-r from-blue-500 to-indigo-500 h-full transition-all duration-500"
                 style={{ width: `${((stageIndex + 1) / STAGES.length) * 100}%` }}
               />
             </div>
@@ -294,7 +454,13 @@ ${post.content}
                     {error.code === 'LINKEDIN_BLOCKED' && (
                       <p>LinkedIn rate limits or blocks requests when detecting automated browsers. Retrying after a short delay may solve the issue.</p>
                     )}
-                    {!['LOGIN_REQUIRED', 'CAPTCHA_REQUIRED', 'INVALID_URL', 'POST_NOT_FOUND', 'LINKEDIN_BLOCKED'].includes(error.code) && (
+                    {error.code === 'NO_DATA' && (
+                      <p>No JSON-LD structured data was found. The post might be private, deleted, or LinkedIn may have blocked automated access. Try again in a moment.</p>
+                    )}
+                    {error.code === 'PARSE_ERROR' && (
+                      <p>The page contained structured data but no valid post content could be extracted. The post format may be unsupported.</p>
+                    )}
+                    {!['LOGIN_REQUIRED', 'CAPTCHA_REQUIRED', 'INVALID_URL', 'POST_NOT_FOUND', 'LINKEDIN_BLOCKED', 'NO_DATA', 'PARSE_ERROR'].includes(error.code) && (
                       <p>Check that the post link is correct, public, and can be viewed without logging in when using incognito mode.</p>
                     )}
                   </div>
@@ -306,13 +472,13 @@ ${post.content}
 
         {/* Scraped Results (Success Card) */}
         {post && (
-          <div className="space-y-6 animate-fade-in">
-            
+          <div className="space-y-6 animate-fade-in mx-auto max-w-xl">
+
             {/* Action Bar */}
             <div className="flex flex-wrap gap-3 items-center justify-between bg-[#0d1321] border border-slate-800 rounded-2xl p-4">
               <div className="flex items-center space-x-2 text-xs text-slate-400">
                 <Clock className="w-3.5 h-3.5 text-blue-400" />
-                <span>Extracted: {new Date(post.scrapedAt).toLocaleTimeString()}</span>
+                <span>Extracted just now</span>
               </div>
               <div className="flex space-x-2">
                 <button
@@ -343,50 +509,64 @@ ${post.content}
 
             {/* Simulated LinkedIn Card */}
             <div className="backdrop-blur-md bg-slate-900/60 border border-slate-800/80 rounded-2xl shadow-2xl overflow-hidden">
-              
+
               {/* Header: Author info */}
               <div className="p-6 pb-4 flex items-start justify-between border-b border-slate-800/40">
                 <div className="flex space-x-4">
-                  
-                  {/* Avatar Icon */}
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-blue-600/20 to-indigo-600/20 border border-blue-500/20 flex items-center justify-center shrink-0 font-outfit text-blue-400 font-bold text-lg">
-                    {getInitials(post.author.name)}
-                  </div>
-                  
+
+                  {/* Avatar — use author image if available, else initials */}
+                  {post.authorImageUrl ? (
+                    <img
+                      src={post.authorImageUrl}
+                      alt={post.authorName}
+                      className="w-12 h-12 rounded-full object-cover border border-blue-500/20 shrink-0"
+                    />
+                  ) : (
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-blue-600/20 to-indigo-600/20 border border-blue-500/20 flex items-center justify-center shrink-0 font-outfit text-blue-400 font-bold text-lg">
+                      {getInitials(post.authorName)}
+                    </div>
+                  )}
+
                   <div>
                     <div className="flex items-center space-x-2">
-                      {post.author.profileUrl ? (
-                        <a 
-                          href={post.author.profileUrl} 
-                          target="_blank" 
-                          rel="noreferrer" 
+                      {post.authorUrl ? (
+                        <a
+                          href={post.authorUrl}
+                          target="_blank"
+                          rel="noreferrer"
                           className="font-outfit font-bold text-slate-100 hover:text-blue-400 hover:underline flex items-center space-x-1 transition duration-150"
                         >
-                          <span>{post.author.name}</span>
+                          <span>{post.authorName}</span>
                           <ExternalLink className="w-3.5 h-3.5 inline text-slate-500" />
                         </a>
                       ) : (
-                        <span className="font-outfit font-bold text-slate-100">{post.author.name}</span>
+                        <span className="font-outfit font-bold text-slate-100">{post.authorName}</span>
                       )}
-                      
+
                       <span className="px-2 py-0.5 text-[9px] font-bold uppercase rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
                         Poster
                       </span>
                     </div>
-                    <p className="text-xs text-slate-400 leading-normal mt-0.5 max-w-xl">
-                      {post.author.headline}
-                    </p>
+
+                    {/* Followers count */}
+                    {post.authorFollowers !== undefined && post.authorFollowers > 0 && (
+                      <div className="flex items-center space-x-1.5 mt-1 text-xs text-slate-400">
+                        <Users className="w-3 h-3 text-slate-500" />
+                        <span>{formatNumber(post.authorFollowers)} followers</span>
+                      </div>
+                    )}
+
                     <div className="flex items-center space-x-2 mt-2 text-[11px] text-slate-500">
                       <Calendar className="w-3 h-3" />
-                      <span>{post.postedAt || 'Recently'}</span>
+                      <span>{formatDate(post.postedAt)}</span>
                     </div>
                   </div>
                 </div>
 
-                <a 
-                  href={post.url} 
-                  target="_blank" 
-                  rel="noreferrer" 
+                <a
+                  href={post.url}
+                  target="_blank"
+                  rel="noreferrer"
                   className="bg-blue-600/10 hover:bg-blue-600/20 border border-blue-500/20 text-blue-400 hover:text-blue-300 p-2.5 rounded-xl transition duration-150 flex items-center justify-center"
                   title="Open Original Post"
                 >
@@ -407,10 +587,10 @@ ${post.content}
                   <div className={`grid gap-1 ${post.images.length > 1 ? 'grid-cols-2' : 'grid-cols-1'}`}>
                     {post.images.map((src, i) => (
                       <div key={i} className="relative overflow-hidden aspect-video group">
-                        <img 
-                          src={src} 
+                        <img
+                          src={src}
                           alt={`Attached media ${i + 1}`}
-                          className="w-full h-full object-cover group-hover:scale-102 transition duration-500" 
+                          className="w-full h-full object-contain group-hover:scale-102 transition duration-500"
                         />
                       </div>
                     ))}
@@ -421,25 +601,25 @@ ${post.content}
               {/* Footer: Social Counts */}
               <div className="p-6 py-4 bg-[#0a0e1a]/40 border-t border-slate-800/30 flex items-center justify-between text-slate-400">
                 <div className="flex space-x-6 text-sm">
-                  
+
                   {/* Likes Pill */}
                   <div className="flex items-center space-x-2 bg-slate-800/40 px-3.5 py-1.5 rounded-full border border-slate-700/30 text-slate-300">
                     <ThumbsUp className="w-4 h-4 text-blue-400 fill-blue-400/10" />
-                    <span className="font-semibold text-slate-200">{post.likes ?? 0}</span>
+                    <span className="font-semibold text-slate-200">{formatNumber(post.likes)}</span>
                     <span className="text-xs text-slate-500">Likes</span>
                   </div>
 
                   {/* Comments Pill */}
                   <div className="flex items-center space-x-2 bg-slate-800/40 px-3.5 py-1.5 rounded-full border border-slate-700/30 text-slate-300">
                     <MessageSquare className="w-4 h-4 text-indigo-400 fill-indigo-400/10" />
-                    <span className="font-semibold text-slate-200">{post.comments ?? 0}</span>
+                    <span className="font-semibold text-slate-200">{formatNumber(post.comments)}</span>
                     <span className="text-xs text-slate-500">Comments</span>
                   </div>
 
                 </div>
-                
+
                 <span className="text-[11px] text-slate-500 italic">
-                  Public post data
+                  via JSON-LD
                 </span>
               </div>
 

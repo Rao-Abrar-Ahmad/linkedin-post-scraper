@@ -208,6 +208,7 @@ async function getNumericDataAttribute(
  */
 export async function parsePostPage(page: Page, url: string): Promise<ScrapedPost> {
   // ── 1. JSON-LD (most complete, no layout dependency) ─────────────────────
+  //console.log("JSON-LD: ", await page.content());
   const jsonLd = await extractJsonLd(page);
 
   // ── 2. Author info ────────────────────────────────────────────────────────
@@ -363,4 +364,75 @@ export async function parsePostPage(page: Page, url: string): Promise<ScrapedPos
     postedAt: postedAt || 'Recently',
     scrapedAt: new Date().toISOString(),
   };
+}
+
+
+
+export interface JsonLdResult {
+  /**
+   * Whether any JSON-LD scripts were found.
+   */
+  exists: boolean;
+
+  /**
+   * Every JSON-LD object found on the page.
+   */
+  objects: Record<string, any>[];
+
+  /**
+   * The SocialMediaPosting object (LinkedIn post)
+   */
+  socialMediaPosting?: Record<string, any>;
+
+  /**
+   * Original script contents.
+   */
+  scripts: string[];
+}
+
+/**
+ * Scrape every JSON-LD block from the page.
+ */
+export async function parseJsonLd(
+  page: Page
+): Promise<JsonLdResult> {
+  const scripts = await page.$$eval(
+    'script[type="application/ld+json"]',
+    (elements) =>
+      elements
+        .map((el) => el.textContent ?? '')
+        .filter(Boolean)
+  );
+
+  const objects: Record<string, any>[] = [];
+
+  for (const script of scripts) {
+    try {
+      const parsed = JSON.parse(script);
+
+      if (Array.isArray(parsed)) {
+        for (const item of parsed) {
+          if (item && typeof item === 'object') {
+            objects.push(item);
+          }
+        }
+      } else if (parsed && typeof parsed === 'object') {
+        objects.push(parsed);
+      }
+    } catch {
+      // Ignore malformed JSON-LD
+    }
+  }
+
+  const socialMediaPosting = objects.find(
+    (obj) => obj['@type'] === 'SocialMediaPosting'
+  );
+
+  return {
+    exists: objects.length > 0,
+    objects,
+    socialMediaPosting,
+    scripts,
+  };
+
 }
