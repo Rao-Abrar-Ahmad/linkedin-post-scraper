@@ -2,20 +2,260 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔍</text></svg>" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Extract, clean, and preview public LinkedIn posts instantly including text, author headlines, image galleries, and engagement counts." />
-    
-    <!-- Google Fonts -->
+
+    <!-- ─── Primary Meta Tags ──────────────────────────────────────────── -->
+    <title>LinkedIn Post Scraper — Copy Any Public LinkedIn Post to Text & Markdown | LPS</title>
+    <meta name="title" content="LinkedIn Post Scraper — Copy Any Public LinkedIn Post to Text & Markdown | LPS" />
+    <meta name="description" content="LPS is a free, open-source LinkedIn post scraper that lets you copy any public LinkedIn post to text or markdown. Extract post content, author details, images, and engagement metrics instantly. The best LinkedIn content copier and post scanner tool." />
+    <meta name="keywords" content="linkedin post scraper, linkedin post copier, linkedin content copier, linkedin post scanner, linkedin post duplicate, linkedin post to text, linkedin post to markdown, linkedin post details, linkedin post details copier, linkedin post content copier, copy linkedin post, extract linkedin post, linkedin post extractor, linkedin scraper tool, linkedin data extraction, linkedin post export, scrape linkedin post, linkedin post reader, linkedin post downloader, free linkedin scraper" />
+    <meta name="author" content="Rao Abrar Ahmad" />
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+    <meta name="googlebot" content="index, follow" />
+    <link rel="canonical" href="https://lps.codebyrsa.com/" />
+
+    <!-- ─── Theme & App ────────────────────────────────────────────────── -->
+    <meta name="theme-color" content="#0a66c2" />
+    <meta name="application-name" content="LPS — LinkedIn Post Scraper" />
+    <meta name="apple-mobile-web-app-title" content="LPS" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+
+    <!-- ─── Favicon ────────────────────────────────────────────────────── -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔗</text></svg>" />
+
+    <!-- ─── Open Graph / Facebook ──────────────────────────────────────── -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://lps.codebyrsa.com/" />
+    <meta property="og:title" content="LinkedIn Post Scraper — Copy Any Public LinkedIn Post to Text & Markdown" />
+    <meta property="og:description" content="Free, open-source tool to scrape and copy any public LinkedIn post. Extract full post text, author info, images, likes, comments, and export to markdown — no login required." />
+    <meta property="og:site_name" content="LPS — LinkedIn Post Scraper" />
+    <meta property="og:locale" content="en_US" />
+
+    <!-- ─── Twitter Card ───────────────────────────────────────────────── -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://lps.codebyrsa.com/" />
+    <meta name="twitter:title" content="LinkedIn Post Scraper — Copy Any Public LinkedIn Post to Text & Markdown" />
+    <meta name="twitter:description" content="Free, open-source tool to scrape and copy any public LinkedIn post. Extract full post text, author info, images, likes, comments, and export to markdown." />
+    <meta name="twitter:creator" content="@raoabrar629" />
+
+    <!-- ─── Google Fonts ───────────────────────────────────────────────── -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    
-    <title>LinkPeek - LinkedIn Public Post Scraper</title>
-    <script type="module" crossorigin src="/assets/index-CSMR8PoD.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-CaS0sVND.css">
+
+    <!-- ─── Structured Data: WebApplication ────────────────────────────── -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "LPS — LinkedIn Post Scraper",
+      "alternateName": ["LinkedIn Post Scraper", "LPS", "LinkedIn Post Copier", "LinkedIn Content Copier"],
+      "url": "https://lps.codebyrsa.com",
+      "description": "A free, open-source LinkedIn post scraper that extracts public post content, author details, images, and engagement metrics. Copy any LinkedIn post to text or markdown instantly.",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "Any",
+      "browserRequirements": "Requires a modern web browser",
+      "softwareVersion": "2.0",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "creator": {
+        "@type": "Person",
+        "name": "Rao Abrar Ahmad"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "CodebyRSA",
+        "url": "https://codebyrsa.com"
+      },
+      "featureList": [
+        "Extract full post text from public LinkedIn posts",
+        "Copy LinkedIn post content to clipboard",
+        "Export LinkedIn posts to Markdown format",
+        "Extract author name, profile URL, and follower count",
+        "Extract post images and media attachments",
+        "Extract engagement metrics (likes and comments)",
+        "JSON-LD structured data extraction",
+        "No LinkedIn login required"
+      ],
+      "screenshot": "https://lps.codebyrsa.com/og-image.png",
+      "sourceOrganization": {
+        "@type": "Organization",
+        "name": "CodebyRSA",
+        "url": "https://codebyrsa.com"
+      }
+    }
+    </script>
+
+    <!-- ─── Structured Data: Organization ──────────────────────────────── -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "CodebyRSA",
+      "url": "https://codebyrsa.com",
+      "description": "CodebyRSA is a modern web design and development agency focused on building high-performing digital experiences, developer tools, and open-source software.",
+      "foundingDate": "2023",
+      "founder": {
+        "@type": "Person",
+        "name": "Rao Abrar Ahmad"
+      },
+      "sameAs": [
+        "https://github.com/Rao-Abrar-Ahmad",
+        "https://www.linkedin.com/in/rao-abrar-ahmad",
+        "https://codebyrsa.com"
+      ]
+    }
+    </script>
+
+    <!-- ─── Structured Data: Person (Creator) ──────────────────────────── -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      "name": "Rao Abrar Ahmad",
+      "givenName": "Rao Abrar",
+      "familyName": "Ahmad",
+      "gender": "Male",
+      "jobTitle": "Front-End Developer",
+      "email": "raoabrar629@gmail.com",
+      "image": "https://res.cloudinary.com/dcxfsvq4i/image/upload/v1777374025/Portfolios/circle-photo-transparent_f724su.jpg",
+      "url": "https://codebyrsa.com",
+      "sameAs": [
+        "https://www.linkedin.com/in/rao-abrar-ahmad",
+        "https://github.com/Rao-Abrar-Ahmad",
+        "https://www.facebook.com/raoabrarahmad629",
+        "https://www.instagram.com/raoabrar629/",
+        "https://stackoverflow.com/users/18127889/rao-abrar-ahmad"
+      ],
+      "worksFor": {
+        "@type": "Organization",
+        "name": "CodebyRSA",
+        "url": "https://codebyrsa.com"
+      },
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Bhakkar",
+        "addressRegion": "Punjab",
+        "postalCode": "40404",
+        "addressCountry": "PK"
+      }
+    }
+    </script>
+
+    <!-- ─── Structured Data: WebSite with SearchAction ─────────────────── -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "LPS — LinkedIn Post Scraper",
+      "alternateName": "LinkedIn Post Scraper",
+      "url": "https://lps.codebyrsa.com",
+      "description": "Free, open-source tool to scrape and copy any public LinkedIn post to text or markdown.",
+      "publisher": {
+        "@type": "Organization",
+        "name": "CodebyRSA",
+        "url": "https://codebyrsa.com"
+      }
+    }
+    </script>
+
+    <!-- ─── Structured Data: FAQPage ───────────────────────────────────── -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is LPS — LinkedIn Post Scraper?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "LPS (LinkedIn Post Scraper) is a free, open-source web tool that lets you extract and copy the full content of any public LinkedIn post. It scrapes the post text, author details, images, engagement metrics (likes and comments), and lets you export everything to markdown — no LinkedIn login required."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How do I copy a LinkedIn post to text?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Simply paste the public LinkedIn post URL into the LPS input field and click 'Extract Data'. The tool will scrape the post and display the full content. You can then click the 'Copy Text' button to copy the post content to your clipboard, or click 'Export MD' to download it as a Markdown file."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does LPS require a LinkedIn account or login?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. LPS works entirely with public LinkedIn posts. It uses a headless browser to access the public-facing page and extracts the JSON-LD structured data that LinkedIn embeds. No LinkedIn credentials are needed."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What data can I extract from a LinkedIn post?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "LPS extracts: the full post text (articleBody), author name and profile URL, author follower count, author profile image, post images and media, engagement metrics (likes and comments count), and the post publication date. All data comes from LinkedIn's JSON-LD structured data."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is LinkedIn Post Scraper free and open source?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. LPS is completely free to use and the source code is available on GitHub under the MIT license. You can self-host it, modify it, or contribute to the project."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I export a LinkedIn post to Markdown?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. After extracting a post, click the 'Export MD' button to download a formatted Markdown file containing the post text, author info, publication date, and engagement metrics. This is perfect for documentation, content repurposing, or archiving."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What types of LinkedIn URLs are supported?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "LPS supports standard LinkedIn post URLs including: linkedin.com/posts/..., linkedin.com/feed/update/urn:li:activity:..., and linkedin.com/pulse/... formats. The URL must point to a publicly accessible post."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How does the LinkedIn post scraper work technically?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "LPS uses Playwright (a headless Chromium browser) on the backend to navigate to the LinkedIn post URL. It then extracts the JSON-LD structured data (Schema.org SocialMediaPosting) that LinkedIn embeds in every public post page. This method is highly accurate and doesn't rely on fragile CSS selectors."
+          }
+        }
+      ]
+    }
+    </script>
+
+    <!-- ─── Structured Data: BreadcrumbList ────────────────────────────── -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://lps.codebyrsa.com/"
+        }
+      ]
+    }
+    </script>
+    <script type="module" crossorigin src="/assets/index-BFLtl99v.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-Bs5BLijX.css">
   </head>
-  <body class="bg-[#070b13] text-slate-100 min-h-screen selection:bg-indigo-500 selection:text-white">
+  <body class="bg-white text-slate-900 min-h-screen selection:bg-blue-100 selection:text-blue-900">
     <div id="root"></div>
   </body>
 </html>

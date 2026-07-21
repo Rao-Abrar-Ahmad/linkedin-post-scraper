@@ -46,12 +46,14 @@ async function scrapeLinkedInPost(rawUrl) {
         }
         const bodyContent = await page.content();
         // Check for standard captcha elements in body
-        if (bodyContent.includes('challenge-container') ||
-            bodyContent.includes('recaptcha') ||
-            bodyContent.includes('arkose') ||
-            (await page.locator('iframe[src*="captcha"], #captcha, #arkose').count()) > 0) {
-            throw new types_1.ScraperException('CAPTCHA_REQUIRED', 'LinkedIn security check (CAPTCHA) detected in the page.');
-        }
+        // if (
+        //   bodyContent.includes('challenge-container') ||
+        //   bodyContent.includes('recaptcha') ||
+        //   bodyContent.includes('arkose') ||
+        //   (await page.locator('iframe[src*="captcha"], #captcha, #arkose').count()) > 0
+        // ) {
+        //   throw new ScraperException('CAPTCHA_REQUIRED', 'LinkedIn security check (CAPTCHA) detected in the page.');
+        // }
         // Check for common login wall container elements in the body
         if ((await page.locator('.login-form, #login-submit, #username, #password').count()) > 0) {
             throw new types_1.ScraperException('LOGIN_REQUIRED', 'LinkedIn login form detected on the page.');
@@ -67,17 +69,19 @@ async function scrapeLinkedInPost(rawUrl) {
         }
         // Ensure we have some content container visible before parsing
         try {
-            // Look for any feed-like elements or main wrapper, wait up to 5s
-            await page.waitForSelector('.core-rail, main, article, .feed-shared-update-v2, .feed-shared-text-view, [data-urn]', {
-                timeout: 5000
-            });
+            // Wait for the article card, JSON-LD script, or core-rail wrapper —
+            // all three are present in the actual guest-page response.
+            await page.waitForSelector('article.main-feed-activity-card, script[type="application/ld+json"], .core-rail', { timeout: 5000 });
         }
         catch (e) {
             // If we can't find structural containers, we still try parsing (relying on meta-tags fallback)
             console.warn('Post container selector not found, proceeding to parse via fallback selectors.');
         }
         // Perform DOM and Metadata parsing
-        const postData = await (0, parser_1.parsePostPage)(page, url);
+        console.log(bodyContent, url);
+        //const postData = await parsePostPage(page, url);
+        console.log('json ld of this post', await (0, parser_1.parseJsonLd)(page));
+        const postData = await (0, parser_1.parseJsonLd)(page);
         return postData;
     }
     catch (error) {

@@ -4,9 +4,10 @@
   "description": "Public LinkedIn Post Scraper monorepo application",
   "main": "dist/server.js",
   "scripts": {
+    "install:frontend": "npm install --prefix frontend",
+    "build:frontend": "npm --prefix frontend run build",
     "build:backend": "tsc",
-    "build:frontend": "npm run --prefix frontend build",
-    "build": "npm run build:frontend && npm run build:backend",
+    "build": "npm run install:frontend && npm run build:frontend && npm run build:backend",
     "start": "cross-env NODE_ENV=production node dist/server.js",
     "dev:backend": "ts-node-dev --respawn --transpile-only src/server.ts",
     "dev:frontend": "npm run --prefix frontend dev",
