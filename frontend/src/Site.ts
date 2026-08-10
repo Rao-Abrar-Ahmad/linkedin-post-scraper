@@ -1,31 +1,34 @@
-
 export const Site = {
   name: "LPS — LinkedIn Post Scraper",
   logo: "",
   url: "https://lps.codebyrsa.com",
   email: 'raoabrar629@gmail.com',
-  SEO_title: "LinkedIn Post Scraper — Copy Any Public LinkedIn Post to Text & Markdown | LPS",
-  SEO_description: "LPS is a free, open-source LinkedIn post scraper that lets you copy any public LinkedIn post to text or markdown. Extract post content, author details, images, and engagement metrics instantly. The best LinkedIn content copier and post scanner tool.",
+  SEO_title: "LinkedIn Post Scraper — Copy & Scrape Any Public LinkedIn Post | LPS",
+  SEO_description: "LPS is a free, open-source LinkedIn post scraper, content copier, and image extractor. Instantly copy public LinkedIn post content to text or markdown with images, author info, and metrics. No login required.",
   keywords: [
-    "linkedin post scraper",
     "linkedin post copier",
+    "linkedin post scraper",
     "linkedin content copier",
-    "linkedin post scanner",
-    "linkedin post duplicate",
-    "linkedin post to text",
+    "linkedin content scraper",
+    "linkedin content duplicator",
+    "linkedin post checker",
+    "linkedin post image scraper",
+    "linkedin post image copier",
+    "linkedin post detector",
+    "linkedin post downloader",
+    "linkedin post extractor",
     "linkedin post to markdown",
-    "linkedin post details",
+    "linkedin post to text",
+    "linkedin post scanner",
     "linkedin post details copier",
     "linkedin post content copier",
     "copy linkedin post",
     "extract linkedin post",
-    "linkedin post extractor",
     "linkedin scraper tool",
     "linkedin data extraction",
     "linkedin post export",
     "scrape linkedin post",
     "linkedin post reader",
-    "linkedin post downloader",
     "free linkedin scraper"
   ],
   author: "Rao Abrar Ahmad",
@@ -83,4 +86,4 @@ export const Site = {
   github: 'https://github.com/Rao-Abrar-Ahmad/linkedin-post-scraper'
 };
 
-//Dream. Design. Develop
+// Dream. Design. Develop
