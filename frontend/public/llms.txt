@@ -1,0 +1,101 @@
+# LPS — LinkedIn Post Scraper & Content Copier
+
+> LPS is a free, open-source LinkedIn post scraper, content copier, and MCP server. It enables human users and AI agents to extract post text, images, author metadata, and engagement statistics from any public LinkedIn post URL without requiring authentication.
+
+## System Overview
+- **Name**: LPS — LinkedIn Post Scraper
+- **Web App**: https://lps.codebyrsa.com
+- **Repository**: https://github.com/Rao-Abrar-Ahmad/linkedin-post-scraper
+- **Creator**: Rao Abrar Ahmad (CodebyRSA)
+- **License**: MIT
+
+## Features & Capabilities
+1. **Post Text Extraction**: Extracts raw post text body (`articleBody`) with original line breaks intact.
+2. **Media & Image Scraper**: Extracts high-resolution attached image URLs and gallery carousel thumbnails.
+3. **Author Metadata**: Extracts author name, profile link, headline, and follower counts.
+4. **Engagement Stats**: Scans reaction counts including like totals and comment counts.
+5. **Markdown Export**: Generates clean Markdown (`.md`) output formatted with headers, metadata, and media links.
+
+## REST API Integration for AI Agents
+
+### `POST /api/scrape`
+Public HTTP endpoint to scrape any public LinkedIn post URL.
+
+#### Request Headers:
+`Content-Type: application/json`
+
+#### Request Body:
+```json
+{
+  "url": "https://www.linkedin.com/posts/username_post-title-activity-7123456789012345678-abc"
+}
+```
+
+#### Response (Success 200 OK):
+```json
+{
+  "success": true,
+  "data": {
+    "exists": true,
+    "socialMediaPosting": {
+      "articleBody": "Full post text content here...",
+      "author": {
+        "name": "Author Name",
+        "url": "https://www.linkedin.com/in/author-profile"
+      },
+      "image": ["https://media.licdn.com/dms/image/..."],
+      "interactionStatistic": [
+        {
+          "interactionType": "https://schema.org/LikeAction",
+          "userInteractionCount": 1250
+        },
+        {
+          "interactionType": "https://schema.org/CommentAction",
+          "userInteractionCount": 84
+        }
+      ],
+      "datePublished": "2026-08-10T10:00:00.000Z"
+    }
+  }
+}
+```
+
+---
+
+## Model Context Protocol (MCP) Integration
+
+AI agents (e.g. Claude Desktop, Cursor, Custom Agents) can invoke LPS tools via MCP protocol.
+
+### MCP Endpoint: `POST /api/mcp`
+
+#### Available Tools:
+- `scrape_linkedin_post`: Extracts post text, author info, images, and reaction counts for a public LinkedIn post URL.
+
+#### JSON-RPC 2.0 Request (`tools/call`):
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "tools/call",
+  "params": {
+    "name": "scrape_linkedin_post",
+    "arguments": {
+      "url": "https://www.linkedin.com/posts/username_post-title-activity-7123456789012345678-abc"
+    }
+  }
+}
+```
+
+#### Direct HTTP JSON Request to MCP Endpoint:
+```json
+{
+  "url": "https://www.linkedin.com/posts/username_post-title-activity-7123456789012345678-abc"
+}
+```
+
+---
+
+## Usage Guidelines for AI Agents
+- Only public LinkedIn posts are supported. Private posts or group posts requiring authentication will return an error code (`LOGIN_REQUIRED` or `NO_DATA`).
+- No API keys or authentication headers are required.
+- Standard HTTP status code `200` indicates successful extraction; `400` or `500` indicates invalid URL format or scraper failure.

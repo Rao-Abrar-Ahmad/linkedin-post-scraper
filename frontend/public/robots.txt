@@ -1,0 +1,6 @@
+# Allow all web crawlers and AI search bots
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://lps.codebyrsa.com/sitemap.xml

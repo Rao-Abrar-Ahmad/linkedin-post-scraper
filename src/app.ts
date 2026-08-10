@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import path from 'path';
 import scrapeRouter from './routes/scrape';
+import mcpRouter from './routes/mcp';
 import { errorHandler } from './middleware/errorHandler';
 
 const app = express();
@@ -12,6 +13,7 @@ app.use(express.json());
 
 // API routing
 app.use('/api', scrapeRouter);
+app.use('/api/mcp', mcpRouter);
 
 // Serve React production build static assets from 'public' folder
 const publicPath = path.join(__dirname, 'public');

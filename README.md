@@ -1,6 +1,6 @@
 # LinkedIn Post Scraper & Content Copier (LPS)
 
-**LPS (LinkedIn Post Scraper)** is a free, open-source web application to scrape and copy public LinkedIn posts. Extract full post text, high-resolution media attachments, author metadata, and reaction counts instantly. Copy text cleanly or export formatted Markdown files for Notion, Obsidian, and documentation — no LinkedIn account or login required.
+**LPS (LinkedIn Post Scraper)** is a free, open-source web application, API, and Model Context Protocol (MCP) server to scrape and copy public LinkedIn posts. Extract full post text, high-resolution media attachments, author metadata, and reaction counts instantly. Copy text cleanly or export formatted Markdown files — no LinkedIn account required.
 
 ---
 
@@ -10,7 +10,22 @@
 - 🖼️ **Image Scraper**: Extract high-res attached post photos and carousel images.
 - 📊 **Metrics & Metadata**: View like counts, comment counts, author headline, and follower stats.
 - 📄 **Markdown Export**: Download formatted `.md` files complete with author details and media links.
-- 🔒 **100% Anonymous**: Uses Schema.org JSON-LD structured data extraction — no LinkedIn login or browser extensions required.
+- 🤖 **MCP & AI Ready**: Native Model Context Protocol (`/api/mcp`) server & `llms.txt` integration for AI agents.
+- 📱 **Installable PWA**: Progressive Web App with manifest and offline caching.
+- 🌐 **SEO Optimized**: Complete with `sitemap.xml`, `robots.txt`, and Schema.org JSON-LD markup.
+
+---
+
+## 🤖 AI Agent & MCP Integration
+
+### Model Context Protocol (MCP) Server Endpoint
+AI agents (e.g. Claude Desktop, Cursor, Custom Agents) can invoke LPS directly via MCP:
+- **MCP HTTP Endpoint**: `POST /api/mcp`
+- **Tool Name**: `scrape_linkedin_post`
+- **Argument**: `{ "url": "https://www.linkedin.com/posts/..." }`
+
+### LLM Specifications
+- Documentation for AI agents is available at [/llms.txt](https://lps.codebyrsa.com/llms.txt).
 
 ---
 
@@ -39,14 +54,15 @@
    npm run dev
    ```
 
-4. Open your browser and navigate to `http://localhost:5173` (or the port shown in your terminal).
+4. Open your browser and navigate to `http://localhost:5173`.
 
 ---
 
 ## 🛠️ Technology Stack
 
-- **Frontend**: React, Vite, Tailwind CSS, Lucide Icons
+- **Frontend**: React, Vite, Tailwind CSS, PWA Service Worker
 - **Backend**: Node.js, Express.js, Playwright (Headless Browser)
+- **AI Protocols**: Model Context Protocol (MCP HTTP & JSON-RPC)
 - **Data Parser**: Schema.org `SocialMediaPosting` JSON-LD
 
 ---
@@ -61,4 +77,4 @@
 
 ## ⚖️ License
 
-Distributed under the MIT License. See `LICENSE` for more information.
+Distributed under the MIT License.

@@ -1,0 +1,19 @@
+{
+  "short_name": "LPS Scraper",
+  "name": "LPS — LinkedIn Post Scraper & Content Copier",
+  "description": "Free, open-source tool to scrape and copy public LinkedIn posts to text or markdown instantly.",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#f8fafc",
+  "theme_color": "#0a66c2",
+  "display": "standalone",
+  "orientation": "portrait",
+  "categories": ["utilities", "productivity", "developer tools"]
+}

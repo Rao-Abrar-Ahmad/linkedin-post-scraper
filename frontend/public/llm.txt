@@ -1,0 +1,23 @@
+# LPS — LinkedIn Post Scraper & Content Copier
+
+> LPS is a free, open-source LinkedIn post scraper, content copier, and MCP server. It enables human users and AI agents to extract post text, images, author metadata, and engagement statistics from any public LinkedIn post URL without requiring authentication.
+
+## System Overview
+- **Name**: LPS — LinkedIn Post Scraper
+- **Web App**: https://lps.codebyrsa.com
+- **Repository**: https://github.com/Rao-Abrar-Ahmad/linkedin-post-scraper
+- **Creator**: Rao Abrar Ahmad (CodebyRSA)
+- **License**: MIT
+
+## REST API Endpoint
+`POST /api/scrape`
+
+```json
+{
+  "url": "https://www.linkedin.com/posts/username_post-title-activity-7123456789012345678-abc"
+}
+```
+
+## MCP Endpoint
+`POST /api/mcp`
+Tool: `scrape_linkedin_post`
